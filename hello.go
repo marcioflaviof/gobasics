@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 const statusOk = 200
@@ -58,7 +61,8 @@ func possiveisEscolhas(escolha int) {
 
 func iniciarMonitoramento() {
 
-	sites := []string{"http://random-status-code.herokuapp.com/", "http://www.google.com/", "http://www.facebook.com/"}
+	// sites := []string{"http://random-status-code.herokuapp.com/", "http://www.google.com/", "http://www.facebook.com/"}
+	sites := leSitesDoArquivo()
 
 	for _, site := range sites {
 
@@ -81,4 +85,33 @@ func testaSite(site string) {
 		fmt.Printf("Deu ruim, site %s fora do ar %d\n", site, resp.StatusCode)
 	}
 
+}
+
+func leSitesDoArquivo() []string {
+
+	var sites []string
+
+	file, err := os.Open("sites.txt")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
+
+	for {
+
+		line, err := reader.ReadString('\n')
+		line = strings.TrimSpace(line)
+
+		sites = append(sites, line)
+
+		if err == io.EOF {
+			break
+		}
+
+	}
+	return sites
 }

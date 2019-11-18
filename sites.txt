@@ -1,0 +1,6 @@
+http://random-status-code.herokuapp.com/
+http://www.google.com
+http://www.facebook.com
+http://www.instagram.com
+http://www.mangalivre.net
+http://www.alura.com
