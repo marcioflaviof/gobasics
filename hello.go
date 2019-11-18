@@ -4,10 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 )
 
 const statusOk = 200
@@ -45,7 +48,7 @@ func possiveisEscolhas(escolha int) {
 	case 1:
 		iniciarMonitoramento()
 	case 2:
-		fmt.Println("Os logs são ...")
+		imprimirLogs()
 
 	case 0:
 		fmt.Println("Té mais")
@@ -61,7 +64,6 @@ func possiveisEscolhas(escolha int) {
 
 func iniciarMonitoramento() {
 
-	// sites := []string{"http://random-status-code.herokuapp.com/", "http://www.google.com/", "http://www.facebook.com/"}
 	sites := leSitesDoArquivo()
 
 	for _, site := range sites {
@@ -80,9 +82,11 @@ func testaSite(site string) {
 
 	if resp.StatusCode == statusOk {
 		fmt.Printf("Tudo certo, o site %s está no ar %d\n", site, resp.StatusCode)
+		registraLog(site, true)
 
 	} else {
 		fmt.Printf("Deu ruim, site %s fora do ar %d\n", site, resp.StatusCode)
+		registraLog(site, false)
 	}
 
 }
@@ -114,4 +118,28 @@ func leSitesDoArquivo() []string {
 
 	}
 	return sites
+}
+
+func registraLog(site string, status bool) {
+
+	file, err := os.OpenFile("log.txt", os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer file.Close()
+
+	file.WriteString(time.Now().Format("02/01/2006 -- 15:04:05") + " / " + site + " - online: " + strconv.FormatBool(status) + "\n")
+
+}
+
+func imprimirLogs() {
+
+	file, err := ioutil.ReadFile("log.txt")
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println(string(file))
 }
